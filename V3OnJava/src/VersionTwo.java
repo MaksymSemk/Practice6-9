@@ -13,7 +13,7 @@ public class VersionTwo {
             if(temp==null || temp.isBlank()) break;
             input+=temp+"\r";
         }
-        System.out.println(turnLinesIntoStringArray(input));
+        //System.out.println(turnLinesIntoStringArray(input));
         ArrayList<String>allInputLines=turnLinesIntoStringArray(input);
         fillKeyArray(allInputLines);
         fillAverageArray(allInputLines);
