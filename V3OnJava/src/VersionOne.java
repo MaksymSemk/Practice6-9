@@ -13,7 +13,7 @@ public class VersionOne {
             if(temp==null || temp.isBlank()) break;
             input+=temp;
         }
-        System.out.println(turnLinesIntoStringArray(input));
+       // System.out.println(turnLinesIntoStringArray(input));
         ArrayList<String>allInputLines=turnLinesIntoStringArray(input);
         fillKeyArray(allInputLines);
         fillAverageArray(allInputLines);
