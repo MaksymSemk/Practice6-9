@@ -21,7 +21,7 @@ values dw 10000*8 dup(0)
 valInd dw 0
 number db 16 dup(0)
 numberInd dw 0
-
+quantity db 100 dup(0)
 
 .code
 main proc
@@ -299,13 +299,24 @@ jmp addNewKey
     inc newInd
    
     ; set new 1 to array of quantities
+
+     ;add to quantity one
+    mov si, offset quantity
+    add si, presInd
+    mov al,1
+    mov [si],al
     jmp endOfCheck;goto end
 
 keyPresent:
     ;key index in cx
     ;add 1 to this index
     mov presInd,cx
-
+    ;add to quantity one
+    mov si, offset quantity
+    add si, presInd
+    mov al, [si]
+    inc al
+    mov [si],al
 endOfCheck:
    ;fill temp key by 0
     mov keyTempInd,0
