@@ -10,11 +10,13 @@ handle dw 0
 buffInd db 0; Index to keep track of the current position in buffer
 oneChar db 0
 
-keys db 5000*16 dup(0)
+keys db 10000*16 dup(0)
 keyInd dw 0
 isWord db 1
-values db 5000*16 dup(0)
+values dw 10000*8 dup(0)
 valInd dw 0
+number db 16 dup(0)
+numberInd dw 0
 
 
 .code
@@ -65,21 +67,22 @@ read_next:
     ;add one to keyCount(pointer)
    ; inc buffInd
 
-;return ax vaulue
+;return  vaulues
 pop dx
 pop cx
 pop bx
 pop ax
     or ax,ax
     jnz read_next
-;clean values last number
-        mov si, offset values
-        mov bx, valInd
-        dec bx
+;clean number last number and write last number
+        mov si, offset number
+        dec numberInd
+       mov bx, numberInd
+    
         add si, bx
         mov al, 0
         mov [si], al
-
+        call trnInNum
 ;fill keys array
 
  mov ah, 09h
@@ -97,16 +100,7 @@ procChar proc
 jnz notCR
 ;change isWord to 1
  mov isWord,1
- ; go to next position in values
- mov ax, valInd
- mov cx, 16
- ;div cx; now ax has number of values
-  shr ax, 4        ; Shift right by 4 position
- inc ax; go to next value 
-mul cx; ax has position of next value
-mov valInd,ax
-  
-
+ call trnInNum
     jmp endProc
 notCR:
 cmp oneChar,0Ah
@@ -133,13 +127,13 @@ notSpace:
     cmp isWord, 0
     jnz itsWord
        ;save char to values
-       mov si, offset values
+       mov si, offset number
        
-        mov bx, valInd
+        mov bx, numberInd
         add si, bx
         mov al, oneChar
         mov [si], al
-        inc valInd
+        inc numberInd
           jmp endProc
 itsWord:
     
@@ -159,6 +153,79 @@ endProc:
     ret
  procChar endp   
 
+
+trnInNum PROC
+
+    ;mov cx, valInd; value position
+    ;dec cx
+    
+    ;mov si, offset number
+    
+    ;add si, numberInd; last char of this number
+    ;dec si
+    xor bx,bx
+    mov cx,0
+calcNum:
+
+    mov si, offset number
+    add si, numberInd; last char of this number
+    dec si
+    sub si,cx; get next char position
+    ;read char
+    xor ax,ax
+    mov al, [si];load char to ax
+
+    ;test if char is '-'
+    cmp ax,45
+    jnz notMinus
+        neg bx;turn bx into negative number
+        jmp afterCalc
+    notMinus:        
+    sub al,'0'; now we have theoretical number in ax
+
+    ;get realnumber
+    push cx
+    cmp cx,0
+    jnz notZer
+    jmp endOFMul
+    notZer:
+    mulByTen:
+    mov dx,10
+        mul dx
+        dec cx
+        cmp cx, 0
+        jnz mulByTen
+
+    endOFMul:    
+    pop cx
+    add bx,ax;add to result
+    
+    inc cx
+    cmp cx, numberInd
+    jnz calcNum
+afterCalc:    
+;save number into values array
+
+  mov si, offset values
+  add si, valInd
+ 
+  mov [si],bx;save number into array
+  ;increment valInd by 2
+  inc valInd
+  inc valInd
+  mov numberInd,0
+  mov cx,0
+  fillZeros:
+    mov si, offset number
+    add si, cx
+    mov [si],0
+    inc cx
+    cmp cx,9
+    jnz fillZeros
+
+
+ret
+trnInNum endp
 end main
 
 
