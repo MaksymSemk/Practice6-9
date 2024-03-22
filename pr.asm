@@ -28,21 +28,21 @@ main proc
     mov ax, @data
     mov ds, ax
 
-mov dx, offset fileName; Address filename with ds:dx 
-mov ah, 03Dh ;DOS Open-File function number 
-mov  al, 0;  0 = Read-only access 
-int 21h; Call DOS to open file 
+    mov dx, offset fileName; Address filename with ds:dx 
+    mov ah, 03Dh ;DOS Open-File function number 
+    mov  al, 0;  0 = Read-only access 
+    int 21h; Call DOS to open file 
 
-jc error ;Call routine to handle errors
-    jmp cont
- error:
-     mov ah, 09h
- mov dx, offset mesBad
-int 21h
-jmp ending
-cont:
+    jc error ;Call routine to handle errors
+        jmp cont
+    error:
+        mov ah, 09h
+    mov dx, offset mesBad
+    int 21h
+    jmp ending
+    cont:
 
-mov [handle] , ax ; Save file handle for later
+    mov [handle] , ax ; Save file handle for later
 
 ;read file and put characters into buffer
 read_next:
@@ -81,9 +81,6 @@ pop ax
 int 21h
 ending:
 main endp
-
-
-
 
 
 procChar proc
@@ -358,7 +355,7 @@ mov dx,0
     mov bx,dx; save counter to bx
     mov dl, [si]
     cmp dl, 0 
-  
+
     jne notEndOfKey
         jmp gotoNumbPrint
     notEndOfKey:
@@ -370,12 +367,27 @@ mov dx,0
     cmp dx, 16
     jnz writeKey
 gotoNumbPrint:
-    ;writeNumb:
-
-
-    ;loop writeNumb
+mov ah, 02h
+mov dl, ' '
+int 21h
+push cx; remember index
+    call turnInChar
+    pop cx
+    mov dx,0
+    writeNumb:
+        mov si, offset number
+        add si, dx
+        mov bl, [si]
+        ;nprint number
+         mov ah, 02h
+         push dx
+         mov dl, bl
+        int 21h
+        pop dx
+        inc dx
+      cmp dx,numberInd
+      jnz writeNumb  
     ;go to new line
-
     mov ah, 02h
 mov dl, 0dh
 int 21h
@@ -388,7 +400,50 @@ jnz makeString
 
 ret
 writeArrays endp
+
+turnInChar proc
+pop dx
+pop bx; get index
+shl bx,1
+mov ax, [values+bx]; get in ax number
+shr bx, 1
+push bx
+push dx
+mov cx,15;number ind
+makeChar:
+    mov dx,0
+    mov bx,10
+    div bx; remainder in dx, quontient in ax
+    mov si, offset keyTemp
+    add si, cx; location to write
+    add dx, '0'
+    mov [si], dl
+    cmp ax, 0
+    jnz contSetNumb
+        mov bx, 16
+        mov numberInd, bx
+        sub numberInd, cx
+        jmp reverse_number
+    contSetNumb:
+    dec cx
+    cmp cx, -1
+    jne makeChar
+;we wrote number into chars
+reverse_number:
+mov cx, 16
+sub cx, numberInd
+mov dx,0
+reverse:
+    mov si, offset keyTemp
+    add si, cx
+    mov di, offset number
+    add di, dx
+    mov al,[si]
+    mov [di], al
+    inc dx
+    inc cx
+    cmp cx,16
+    jnz reverse
+ret
+turnInChar endp
 end main
-
-
-
