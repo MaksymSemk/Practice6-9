@@ -1,27 +1,22 @@
 .model small
-.stack 10h
+.stack 100h
 
 .data
-filename  db "in.txt", 0
+filename  db "in.txt"
 mes db "Succ $"
 mesBad db "File error $"
 handle dw 0
-
-buffInd db 0; Index to keep track of the current position in buffer
 oneChar db 0
-
 presInd dw 0
 newInd dw 0
 keys db 10000*16 dup(0)
-keyInd dw 0
 keyTemp db 16 dup(0)
 keyTempInd dw 0
 isWord db 1
 values dw 10000 dup(0)
-valInd dw 0
 number db 16 dup(0)
 numberInd dw 0
-quantity dw 100 dup(0)
+quantity dw 3000 dup(0)
 
 .code
 main proc
@@ -75,6 +70,7 @@ pop ax
     call trnInNum
  ;calculate average value
  call calcAvr   
+ call sortArr
  call writeArrays
  mov ah, 09h
  mov dx, offset mes
@@ -343,6 +339,11 @@ makeString:
 mov ax,0
 mov presInd,ax
 mov dx,0
+push cx
+    mov di, offset quantity
+    shl cx,1
+    add di,cx;get index of numbers
+    mov cx, [di]
     writeKey:
     mov si, offset keys
     mov ax,0
@@ -395,6 +396,7 @@ int 21h
  mov ah, 02h
 mov dl, 0ah
 int 21h
+pop cx
 inc cx
 cmp cx, newInd
 jnz makeString
@@ -464,4 +466,56 @@ jc positiveVal
 positiveVal:
 ret
 addMinus endp
+
+sortArr proc
+pop dx; save address
+;set array of pointers
+mov cx,0
+fillArrayOfPoint:
+
+    
+    mov di, offset quantity
+    shl cx,1
+    add di,cx
+    shr cx,1    
+    mov [di],cx;mov to quantity address of next value
+    inc cx
+    cmp cx, newInd
+    jnz fillArrayOfPoint
+
+;sort array of pointers
+mov cx, word ptr newInd
+    dec cx  ; count-1
+outerLoop:
+    push cx
+    lea si, quantity
+innerLoop:
+
+    mov ax, [si];get index
+    push ax; remember index of numb
+    shl ax,1; get index in values
+    add ax,offset values;get address of values
+    mov di, ax
+    mov ax, [di]
+    mov bx, [si+2];get next index
+    push bx; remember index of next numb
+    shl bx,1; get next index in values
+    add bx,offset values
+   mov di, bx
+    mov bx, [di]
+    cmp ax, bx;compare value with next value
+    pop bx
+    pop ax
+    jl nextStep
+    xchg bx, ax
+    mov [si], ax
+    MOV [si+2],bx
+nextStep:
+    add si, 2
+    loop innerLoop
+    pop cx
+    loop outerLoop
+push dx
+ret
+sortArr endp
 end main
