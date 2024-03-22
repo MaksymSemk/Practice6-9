@@ -372,13 +372,14 @@ mov dl, ' '
 int 21h
 push cx; remember index
     call turnInChar
-    pop cx
+pop cx; get index
+        call addMinus
     mov dx,0
     writeNumb:
         mov si, offset number
         add si, dx
         mov bl, [si]
-        ;nprint number
+        ;print number
          mov ah, 02h
          push dx
          mov dl, bl
@@ -406,6 +407,10 @@ pop dx
 pop bx; get index
 shl bx,1
 mov ax, [values+bx]; get in ax number
+cmp ax, 10000
+jc positive
+    neg ax
+positive:
 shr bx, 1
 push bx
 push dx
@@ -427,7 +432,7 @@ makeChar:
     contSetNumb:
     dec cx
     cmp cx, -1
-    jne makeChar
+    jne makeChar  
 ;we wrote number into chars
 reverse_number:
 mov cx, 16
@@ -446,4 +451,17 @@ reverse:
     jnz reverse
 ret
 turnInChar endp
+
+addMinus proc
+mov bx,cx
+shl bx,1
+mov ax, [values+bx]; get in ax number
+cmp ax, 10000
+jc positiveVal
+    mov ah,02h
+    mov dl, '-'
+    int 21h
+positiveVal:
+ret
+addMinus endp
 end main
