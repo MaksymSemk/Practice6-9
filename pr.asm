@@ -1,5 +1,5 @@
 .model small
-.stack 100h
+.stack 10h
 
 .data
 filename  db "in.txt", 0
@@ -17,11 +17,11 @@ keyInd dw 0
 keyTemp db 16 dup(0)
 keyTempInd dw 0
 isWord db 1
-values dw 10000*8 dup(0)
+values dw 10000 dup(0)
 valInd dw 0
 number db 16 dup(0)
 numberInd dw 0
-quantity db 100 dup(0)
+quantity dw 100 dup(0)
 
 .code
 main proc
@@ -58,42 +58,31 @@ read_next:
     push bx
     push cx
     push dx
-    call procChar
-    ;where to write oneChar
-    ;mov al, oneChar        ; Load the character into AL register
-    ;mov bl, buffInd           ; Index of the 5th element (0-based index)
-    
-    ;mov si, offset buffer  ; Load the base address of the array
-    ;add si, bx            ; Calculate the address of the element to write into
-    
-   ; mov [si], al        ; Write the character into the array element
-
-    ;add one to keyCount(pointer)
-   ; inc buffInd
-
-;return  vaulues
+    call procChar ;process char
+   
 pop dx
 pop cx
 pop bx
 pop ax
     or ax,ax
     jnz read_next
-;clean number last number and write last number
-     ;   mov si, offset number
-     ;   dec numberInd
-    ;   mov bx, numberInd
-;
-    ;    add si, bx
-    ;    mov al, 0
-    ;    mov [si], al
-    ;    call trnInNum
-;fill keys array
-
+;remove last char in number
+    mov si, offset number
+    dec numberInd
+    add si, numberInd
+    mov [si],0
+    ;turn it into number
+    call trnInNum
+ ;calculate average value
+ call calcAvr   
+ call writeArrays
  mov ah, 09h
  mov dx, offset mes
 int 21h
 ending:
 main endp
+
+
 
 
 
@@ -117,14 +106,6 @@ cmp oneChar,20h
 jnz notSpace
 ;chance isWord to 0
 mov isWord,0
-; go to next position in keys
- ;mov ax, keyInd
- ;mov cx, 16
- ;div cx; now ax has number of keys
- ;shr ax, 4        ; Shift right by 4 position
- ;inc ax; go to next key 
-;mul cx; ax has position of next key
-;mov keyInd,ax
  ;check if key exists
     call checkKey
     jmp endProc
@@ -294,17 +275,17 @@ jmp addNewKey
     inc cx
     cmp cx, 16
     jnz addNewKey
-     mov cx, newInd
+    mov cx, newInd
     mov presInd,cx
     inc newInd
-   
-    ; set new 1 to array of quantities
-
-     ;add to quantity one
+        ; set new 1 to array of quantities
+ ;add to quantity one
     mov si, offset quantity
-    add si, presInd
-    mov al,1
-    mov [si],al
+    mov cx, presInd
+    shl cx,1
+    add si, cx
+    mov ax,1
+    mov [si],ax
     jmp endOfCheck;goto end
 
 keyPresent:
@@ -313,10 +294,12 @@ keyPresent:
     mov presInd,cx
     ;add to quantity one
     mov si, offset quantity
-    add si, presInd
-    mov al, [si]
-    inc al
-    mov [si],al
+    mov cx, presInd
+    shl cx,1
+    add si, cx
+    mov ax, [si]
+    inc ax
+    mov [si],ax
 endOfCheck:
    ;fill temp key by 0
     mov keyTempInd,0
@@ -330,6 +313,81 @@ endOfCheck:
     jnz fillZeroskey  
     ret
 checkKey endp
+
+
+calcAvr proc
+
+mov cx,0;counter
+calcAv:
+mov si, offset values
+shl cx,1
+add si,cx; next number
+
+mov di, offset quantity
+add di, cx;present quantity of this number
+shr cx,1
+mov ax, [si]; mov number to ax
+mov bx, [di]; mov quantity to dx
+mov dx,0
+div bx; get average of these numbers
+mov [si], ax; put average to values
+inc cx
+cmp cx, newInd
+jnz calcAv
+
+ret
+calcAvr endp
+
+writeArrays proc
+
+
+mov cx,0
+makeString:
+mov ax,0
+mov presInd,ax
+mov dx,0
+    writeKey:
+    mov si, offset keys
+    mov ax,0
+    mov ax, cx; index of cell
+    shl ax, 4; real index of cell
+    add si, ax
+    add si, presInd
+    ;write char
+    mov ah, 02h
+    mov bx,dx; save counter to bx
+    mov dl, [si]
+    cmp dl, 0 
+  
+    jne notEndOfKey
+        jmp gotoNumbPrint
+    notEndOfKey:
+  
+    int 21h
+    mov dx,bx
+    inc presInd
+    inc dx
+    cmp dx, 16
+    jnz writeKey
+gotoNumbPrint:
+    ;writeNumb:
+
+
+    ;loop writeNumb
+    ;go to new line
+
+    mov ah, 02h
+mov dl, 0dh
+int 21h
+ mov ah, 02h
+mov dl, 0ah
+int 21h
+inc cx
+cmp cx, newInd
+jnz makeString
+
+ret
+writeArrays endp
 end main
 
 
