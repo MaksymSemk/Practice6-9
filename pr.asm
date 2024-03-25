@@ -23,26 +23,27 @@ main proc
     mov ax, @data
     mov ds, ax
 
-    mov dx, offset fileName; Address filename with ds:dx 
-    mov ah, 03Dh ;DOS Open-File function number 
-    mov  al, 0;  0 = Read-only access 
-    int 21h; Call DOS to open file 
+   ; jmp read_next
+   ; mov dx, offset fileName; Address filename with ds:dx 
+   ; mov ah, 03Dh ;DOS Open-File function number 
+   ; mov  al, 0;  0 = Read-only access 
+   ; int 21h; Call DOS to open file 
 
-    jc error ;Call routine to handle errors
-        jmp cont
-    error:
-        mov ah, 09h
-    mov dx, offset mesBad
-    int 21h
-    jmp ending
-    cont:
+   ; jc error ;Call routine to handle errors
+   ;    jmp cont
+   ; error:
+   ;    mov ah, 09h
+    ;mov dx, offset mesBad
+    ;int 21h
+  ; jmp ending
+   ; cont:
 
-    mov [handle] , ax ; Save file handle for later
+    ;mov [handle] , ax ; Save file handle for later
 
 ;read file and put characters into buffer
 read_next:
     mov ah, 3Fh
-    mov bx, [handle]  ; file handle
+    mov bx, 0  ; file handle
     mov cx, 1   ; 1 byte to read
     mov dx, offset oneChar   ; read to ds:dx 
     int 21h   ;  ax = number of bytes read
@@ -72,9 +73,9 @@ pop ax
  call calcAvr   
  call sortArr
  call writeArrays
- mov ah, 09h
- mov dx, offset mes
-int 21h
+ ;mov ah, 09h
+ ;mov dx, offset mes
+;int 21h
 ending:
 main endp
 
@@ -85,14 +86,20 @@ procChar proc
     cmp oneChar,0Dh
 jnz notCR
 ;change isWord to 1
- mov isWord,1
+cmp isWord,0
+jne endProc
+mov isWord,1
  call trnInNum
     jmp endProc
 notCR:
 cmp oneChar,0Ah
 jnz notLF
 ;change isWord to 1
+
+cmp isWord,0
+jnz endProc
 mov isWord,1
+ call trnInNum
     jmp endProc
 notLF:
 cmp oneChar,20h
