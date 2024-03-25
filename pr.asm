@@ -77,6 +77,8 @@ pop ax
  ;mov dx, offset mes
 ;int 21h
 ending:
+mov ax, 4C00h
+    int 21h
 main endp
 
 
@@ -339,8 +341,6 @@ ret
 calcAvr endp
 
 writeArrays proc
-
-
 mov cx,0
 makeString:
 mov ax,0
@@ -375,34 +375,36 @@ push cx
     cmp dx, 16
     jnz writeKey
 gotoNumbPrint:
-mov ah, 02h
-mov dl, ' '
-int 21h
-push cx; remember index
-    call turnInChar
-pop cx; get index
-        call addMinus
-    mov dx,0
-    writeNumb:
-        mov si, offset number
-        add si, dx
-        mov bl, [si]
-        ;print number
-         mov ah, 02h
-         push dx
-         mov dl, bl
-        int 21h
-        pop dx
-        inc dx
-      cmp dx,numberInd
-      jnz writeNumb  
-    ;go to new line
+;mov ah, 02h
+;mov dl, ' '
+;int 21h
+;push cx; remember index
+;    call turnInChar
+;pop cx; get index
+;        call addMinus
+;    mov dx,0
+;    writeNumb:
+;        mov si, offset number
+;        add si, dx
+;        mov bl, [si]
+;        ;print number
+;         mov ah, 02h
+;         push dx
+;         mov dl, bl
+;        int 21h
+;        pop dx
+;        inc dx
+;      cmp dx,numberInd
+;      jnz writeNumb  
+
+;go to new line
     mov ah, 02h
 mov dl, 0dh
 int 21h
  mov ah, 02h
 mov dl, 0ah
 int 21h
+;check if its not the last key-average
 pop cx
 inc cx
 cmp cx, newInd
@@ -497,7 +499,6 @@ outerLoop:
     push cx
     lea si, quantity
 innerLoop:
-
     mov ax, [si];get index
     push ax; remember index of numb
     shl ax,1; get index in values
@@ -513,7 +514,7 @@ innerLoop:
     cmp ax, bx;compare value with next value
     pop bx
     pop ax
-    jl nextStep
+    jg nextStep
     xchg bx, ax
     mov [si], ax
     MOV [si+2],bx
