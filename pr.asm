@@ -2,10 +2,6 @@
 .stack 100h
 
 .data
-filename  db "in.txt"
-mes db "Succ $"
-mesBad db "File error $"
-handle dw 0
 oneChar db 0
 presInd dw 0
 newInd dw 0
@@ -23,24 +19,7 @@ main proc
     mov ax, @data
     mov ds, ax
 
-   ; jmp read_next
-   ; mov dx, offset fileName; Address filename with ds:dx 
-   ; mov ah, 03Dh ;DOS Open-File function number 
-   ; mov  al, 0;  0 = Read-only access 
-   ; int 21h; Call DOS to open file 
-
-   ; jc error ;Call routine to handle errors
-   ;    jmp cont
-   ; error:
-   ;    mov ah, 09h
-    ;mov dx, offset mesBad
-    ;int 21h
-  ; jmp ending
-   ; cont:
-
-    ;mov [handle] , ax ; Save file handle for later
-
-;read file and put characters into buffer
+;read stdin and put characters into keyTemp or number
 read_next:
     mov ah, 3Fh
     mov bx, 0  ; file handle
@@ -51,14 +30,8 @@ read_next:
 
     ;save ax
     push ax
-    push bx
-    push cx
-    push dx
+
     call procChar ;process char
-   
-pop dx
-pop cx
-pop bx
 pop ax
     or ax,ax
     jnz read_next
@@ -73,9 +46,6 @@ pop ax
  call calcAvr   
  call sortArr
  call writeArrays
- ;mov ah, 09h
- ;mov dx, offset mes
-;int 21h
 ending:
 mov ax, 4C00h
     int 21h
@@ -123,15 +93,6 @@ notSpace:
         inc numberInd
           jmp endProc
 itsWord:
-    
-         ;save char to keys
-        ;mov si, offset keys
-       ; mov bx, keyInd 
-       ; add si, bx
-       ; mov al, oneChar
-       ; mov [si], al
-       ; inc keyInd 
-        ;add char to KeyTemp
         mov si, offset keyTemp
         mov bx, keyTempInd 
         add si, bx
@@ -141,21 +102,11 @@ itsWord:
       
 
 endProc:
-    ;push dx
     ret
  procChar endp   
 
 
 trnInNum PROC
-
-    ;mov cx, valInd; value position
-    ;dec cx
-    
-    ;mov si, offset number
-    
-    ;add si, numberInd; last char of this number
-    ;dec si
-    
     xor bx,bx
     mov cx,0
 calcNum:
@@ -205,9 +156,6 @@ afterCalc:
   add si, ax
   add bx, [si];add previously saved number
   mov [si],bx;save number into array
-  ;increment valInd by 2
-  ;inc valInd
-  ;inc valInd
   mov numberInd,0
   mov cx,0
   ;fill number by 0
@@ -280,7 +228,7 @@ jmp addNewKey
     mov cx, newInd
     mov presInd,cx
     inc newInd
-        ; set new 1 to array of quantities
+     ; set new 1 to array of quantities
  ;add to quantity one
     mov si, offset quantity
     mov cx, presInd
@@ -365,38 +313,15 @@ push cx
     cmp dl, 0 
 
     jne notEndOfKey
-        jmp gotoNumbPrint
+        jmp gotoNewLine
     notEndOfKey:
-  
     int 21h
     mov dx,bx
     inc presInd
     inc dx
     cmp dx, 16
     jnz writeKey
-gotoNumbPrint:
-;mov ah, 02h
-;mov dl, ' '
-;int 21h
-;push cx; remember index
-;    call turnInChar
-;pop cx; get index
-;        call addMinus
-;    mov dx,0
-;    writeNumb:
-;        mov si, offset number
-;        add si, dx
-;        mov bl, [si]
-;        ;print number
-;         mov ah, 02h
-;         push dx
-;         mov dl, bl
-;        int 21h
-;        pop dx
-;        inc dx
-;      cmp dx,numberInd
-;      jnz writeNumb  
-
+gotoNewLine:
 ;go to new line
     mov ah, 02h
 mov dl, 0dh
