@@ -12,7 +12,7 @@ isWord db 1
 values dw 10000 dup(0)
 number db 16 dup(0)
 numberInd dw 0
-quantity dw 3000 dup(0)
+quantity dw 8100 dup(0)
 
 .code
 main proc
