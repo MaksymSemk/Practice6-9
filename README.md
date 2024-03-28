@@ -1,8 +1,8 @@
-# Семенюк Максим, 3 варіант
-Вимоги до проєкту:
+# Maksym Semeniuk, 3rd variant
+Project requirements:
 
-1. Прочитати з stdin N рядків до появи EOF (максимум 10000 рядків).
-2. Рядки розділяються АБО послідовністю байтів 0x0D та 0x0A (CR LF), або одним символом - 0x0D чи 0x0A.
-4. Кожен рядок це пара "<key> <value>" (розділяються пробілом), де ключ - це текстовий ідентифікатор макс 16 символів (будь-які символи окрім white space chars - пробілу чи переводу на новий рядок), а значення - це десяткове ціле знакове число в діапазоні [-10000, 10000].
-5. Провести групування: заповнити два масиви (або масив структур з 2х значень) для зберігання пари <key> та <average> , які будуть включати лише унікальні значення <key> а <average> - це средне значення, обраховане для всіх <value>, що відповідають конкретному значенню <key>.
-6. Відсортувати алгоритмом bubble sort за <average>, та вивести в stdout  значення key від більших до менших (average desc), кожен key окремим рядком.
+1. Read N lines from stdin until EOF occurs (maximum 10000 lines).
+2. Lines are separated EITHER by a sequence of bytes 0x0D and 0x0A (CR LF), or by a single character - 0x0D or 0x0A.
+4. Each line is a "<key> <value>" pair (separated by a space), where the key is a text identifier of max 16 characters (any characters except white space chars - a space or a newline), and the value is a signed decimal integer in the range [-10000, 10000].
+5. Carry out grouping: fill two arrays (or an array of structures from 2 values) to store the pair <key> and <average>, which will include only unique <key> values, and <average> is the average value calculated for all <value > corresponding to a specific <key> value.
+6. Sort with the bubble sort algorithm according to <average>, and output key values from larger to smaller (average desc), each key in a separate line, to stdout.
