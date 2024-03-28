@@ -2,6 +2,10 @@
 .stack 100h
 
 .data
+filename    db "in.txt", 0
+mes db "Succ $"
+mesBad db "File error $"
+handle dw 0
 oneChar db 0
 presInd dw 0
 newInd dw 0
@@ -12,14 +16,15 @@ isWord db 1
 values dw 10000 dup(0)
 number db 16 dup(0)
 numberInd dw 0
-quantity dw 8100 dup(0)
 
+quantity_seg segment
+quantity dw 10000 dup(0)
+quantity_seg ends
 .code
+assume cs:@code, ds:@data, es:quantity_seg
 main proc
     mov ax, @data
     mov ds, ax
-
-;read stdin and put characters into keyTemp or number
 read_next:
     mov ah, 3Fh
     mov bx, 0  ; file handle
