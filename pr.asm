@@ -435,12 +435,20 @@ innerLoop:
     add ax,offset values;get address of values
     mov di, ax
     mov ax, [di]
+   cmp ax, 10000
+    jl contCalcAx
+    neg ax
+    contCalcAx:
     mov bx, [si+2];get next index
     push bx; remember index of next numb
     shl bx,1; get next index in values
     add bx,offset values
    mov di, bx
     mov bx, [di]
+    cmp bx, 10000
+    jl contCalcBx
+    neg bx
+    contCalcBx:
     cmp ax, bx;compare value with next value
     pop bx
     pop ax
